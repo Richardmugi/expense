@@ -1,5 +1,5 @@
 import 'package:expense/amount_page.dart';
-import 'package:expense/transaction.dart';
+
 import 'package:flutter/material.dart';
 
 class ExpenseTrackingPage extends StatefulWidget {
@@ -42,20 +42,6 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
         ),
       );
     }
-  }
-
-  void _onTransactionSaved(String expense, double quantity, double amount) {
-    // TODO: Implement the logic to save the transaction.
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TransactionDisplayPage(
-          expense: expense,
-          quantity: quantity,
-          amount: amount,
-        ),
-      ),
-    );
   }
 
   @override
@@ -128,6 +114,28 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
             ],
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0, // Set the current index for the ExpenseTrackingPage
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Categories',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Records',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 1) {
+            // Navigate to the RecordsPage
+            Navigator.pushNamed(
+              context,
+              '/fourth',
+            );
+          }
+        },
       ),
     );
   }

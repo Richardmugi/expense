@@ -1,4 +1,7 @@
+import 'package:expense/records.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AmountPage extends StatefulWidget {
   final String expense;
@@ -10,15 +13,29 @@ class AmountPage extends StatefulWidget {
 }
 
 class _AmountPageState extends State<AmountPage> {
-  // ignore: unused_field
   double _quantity = 1;
-  // ignore: unused_field
   double _amount = 0;
 
-  void _saveAmount() {
-    // TODO: Save the _quantity and _amount to your desired storage (e.g., SharedPreferences, database).
-    Navigator.pop(
-        context); // Navigate back to the previous screen after saving.
+  void _saveAmount() async {
+    // Save the _quantity and _amount to SharedPreferences.
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final expenseRecord = {
+      'expense': widget.expense,
+      'quantity': _quantity,
+      'amount': _amount,
+      'date': DateTime.now()
+          .toString(), // Add the current date and time to the record.
+    };
+    List<String> existingRecords = prefs.getStringList('expense_records') ?? [];
+    existingRecords.add(json.encode(expenseRecord));
+    prefs.setStringList('expense_records', existingRecords);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecordsPage(),
+      ),
+    );
   }
 
   @override
@@ -50,8 +67,10 @@ class _AmountPageState extends State<AmountPage> {
                 }
                 return null;
               },
-              onSaved: (value) {
-                _quantity = double.tryParse(value!) ?? 1.0;
+              onChanged: (value) {
+                setState(() {
+                  _quantity = double.tryParse(value) ?? 1.0;
+                });
               },
             ),
             SizedBox(height: 10),
@@ -68,8 +87,10 @@ class _AmountPageState extends State<AmountPage> {
                 }
                 return null;
               },
-              onSaved: (value) {
-                _amount = double.tryParse(value!) ?? 0.0;
+              onChanged: (value) {
+                setState(() {
+                  _amount = double.tryParse(value) ?? 0.0;
+                });
               },
             ),
             SizedBox(height: 20),
@@ -79,6 +100,28 @@ class _AmountPageState extends State<AmountPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1, // Set the current index for the AmountPage
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Categories',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: 'Amount',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            // Navigate to the ExpenseTrackingPage (Categories page)
+            Navigator.pushNamed(
+              context,
+              '/third',
+            );
+          }
+        },
       ),
     );
   }
