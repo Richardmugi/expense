@@ -27,43 +27,77 @@ class _RecordsPageState extends State<RecordsPage> {
     });
   }
 
+  double _calculateTotalExpenses() {
+    return _expenseRecords.length.toDouble();
+  }
+
+  double _calculateTotalAmount() {
+    double totalAmount = 0;
+    for (var record in _expenseRecords) {
+      totalAmount += record['amount'];
+    }
+    return totalAmount;
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalExpenses = _calculateTotalExpenses();
+    double totalAmount = _calculateTotalAmount();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Expense Records'),
+        title: Text('Expense Records '),
+        backgroundColor: Colors.purple,
       ),
       body: _expenseRecords.isNotEmpty
           ? ListView(
-              children: List.generate(_expenseRecords.length, (index) {
-                final expenseRecord = _expenseRecords[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    title: Text('Expense: ${expenseRecord['expense']}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Quantity: ${expenseRecord['quantity']}'),
-                        Text('Amount: \$${expenseRecord['amount']}'),
-                        Text('Date: ${expenseRecord['date']}'),
-                      ],
+              children: [
+                ...List.generate(_expenseRecords.length, (index) {
+                  final expenseRecord = _expenseRecords[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      title: Text('Expense: ${expenseRecord['expense']}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Quantity: ${expenseRecord['quantity']}'),
+                          Text('Amount: \$${expenseRecord['amount']}'),
+                          Text('Date: ${expenseRecord['date']}'),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _showDeleteConfirmationDialog(index);
+                        },
+                      ),
                     ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _showDeleteConfirmationDialog(index);
-                      },
-                    ),
+                  );
+                }),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total Expenses: $totalExpenses',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                );
-              }),
+                ),
+              ],
             )
           : Center(
               child: Text('No expense records found.'),
             ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1, // Set the current index for the RecordsPage to 1
+        currentIndex: 1,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.category),
@@ -76,13 +110,8 @@ class _RecordsPageState extends State<RecordsPage> {
         ],
         onTap: (index) {
           if (index == 0) {
-            // Navigate to the ExpenseTrackingPage (Categories page)
-            Navigator.pushNamed(
-              context,
-              '/third',
-            );
+            Navigator.pushNamed(context, '/third');
           }
-          // If the index is 1, stay on the RecordsPage (do nothing).
         },
       ),
     );
