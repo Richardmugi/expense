@@ -16,12 +16,25 @@ class _RecordsPageState extends State<RecordsPage> {
     _loadRecords();
   }
 
+  String selectedCurrency = 'USD'; // Default currency
+
   void _loadRecords() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> recordStrings = prefs.getStringList('expense_records') ?? [];
     List<Map<String, dynamic>> records = recordStrings.map((record) {
-      return Map<String, dynamic>.from(json.decode(record));
+      Map<String, dynamic> recordMap =
+          Map<String, dynamic>.from(json.decode(record));
+      String currency = recordMap['currency'] ??
+          'USD'; // Default to USD if no currency is found
+      recordMap['currency'] = currency;
+      return recordMap;
     }).toList();
+
+    // Set the selectedCurrency based on the first record's currency
+    if (records.isNotEmpty) {
+      selectedCurrency = records.first['currency'];
+    }
+
     setState(() {
       _expenseRecords = records;
     });
@@ -61,7 +74,8 @@ class _RecordsPageState extends State<RecordsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Quantity: ${expenseRecord['quantity']}'),
-                          Text('Amount: \$${expenseRecord['amount']}'),
+                          Text(
+                              'Amount: ${expenseRecord['currency']} ${expenseRecord['amount']}'),
                           Text('Date: ${expenseRecord['date']}'),
                         ],
                       ),
@@ -84,9 +98,11 @@ class _RecordsPageState extends State<RecordsPage> {
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+                        'Total Amount: $selectedCurrency ${totalAmount.toStringAsFixed(2)}',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),

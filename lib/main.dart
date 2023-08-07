@@ -1,12 +1,12 @@
 import 'package:expense/category.dart';
+
 import 'package:expense/goals.dart';
 import 'package:expense/login.dart';
+import 'package:expense/records.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import './widgets/new_transaction.dart';
-import './widgets/transaction_list.dart';
+
 import 'package:flutter/material.dart';
-import './models/transaction.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,6 +23,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomeRoute(),
         '/second': (context) => const Login(),
         '/third': (context) => ExpenseTrackingPage(),
+        '/fourth': (context) => RecordsPage(),
+        'fifth': (context) => BudgetPage(),
       },
     );
   }
@@ -64,6 +66,8 @@ class _HomeRouteState extends State<HomeRoute> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Image.asset('assets/imageexpense.png', width: 200, height: 200),
+            SizedBox(height: 20),
             Text(
               "Welcome to our cutting-edge Expense App Tracker, the ultimate tool to supercharge your financial management! Say goodbye to the hassles of tracking expenses manually and embrace the future of effortless finance control",
               style: TextStyle(fontSize: 16),
@@ -83,17 +87,6 @@ class _HomeRouteState extends State<HomeRoute> {
                   Navigator.pushNamed(context, '/second');
                 }
               },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ExpenseGoalPage(),
-                  ),
-                );
-              },
-              child: Text('Set a Goal'),
             ),
           ],
         ),

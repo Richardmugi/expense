@@ -13,14 +13,16 @@ class _BudgetPageState extends State<BudgetPage> {
   double _weeklyTotal = 0;
   double _monthlyTotal = 0;
   String? _selectedBudgetType;
+  String? _selectedCurrency = 'USD';
+
   // New variable to store the selected budget type.
 
   void _saveGoals() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setDouble('weekly_goal', _weeklyGoal);
     prefs.setDouble('monthly_goal', _monthlyGoal);
-    prefs.setString('selected_budget_type',
-        _selectedBudgetType!); // Save the selected budget type.
+    prefs.setString('selected_budget_type', _selectedBudgetType!);
+    prefs.setString('selected_currency', _selectedCurrency!);
   }
 
   void _loadGoals() async {
@@ -28,8 +30,8 @@ class _BudgetPageState extends State<BudgetPage> {
     setState(() {
       _weeklyGoal = prefs.getDouble('weekly_goal') ?? 0;
       _monthlyGoal = prefs.getDouble('monthly_goal') ?? 0;
-      _selectedBudgetType = prefs
-          .getString('selected_budget_type'); // Load the selected budget type.
+      _selectedBudgetType = prefs.getString('selected_budget_type');
+      _selectedCurrency = prefs.getString('selected_currency') ?? 'USD';
     });
   }
 
@@ -82,6 +84,7 @@ class _BudgetPageState extends State<BudgetPage> {
     required double goalAmount,
     required double totalAmount,
     required VoidCallback onTap,
+    required String currency,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -101,13 +104,13 @@ class _BudgetPageState extends State<BudgetPage> {
             ),
             SizedBox(height: 10),
             Text(
-              'Goal: \$${goalAmount.toStringAsFixed(2)}',
+              'Goal: $currency ${goalAmount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 16),
             ),
             if (totalAmount > 0) ...[
               SizedBox(height: 10),
               Text(
-                'Amount used: \$${totalAmount.toStringAsFixed(2)}',
+                'Amount used: $currency ${totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(fontSize: 16),
               ),
             ],
@@ -128,24 +131,50 @@ class _BudgetPageState extends State<BudgetPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Set Weekly Goal'),
-          content: TextFormField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'Amount (\$)'),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a valid amount';
-              }
-              final double amount = double.tryParse(value) ?? 0.0;
-              if (amount <= 0) {
-                return 'Amount must be greater than zero';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              setState(() {
-                _weeklyGoal = double.tryParse(value) ?? 0.0;
-              });
-            },
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Amount (\$)'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a valid amount';
+                  }
+                  final double amount = double.tryParse(value) ?? 0.0;
+                  if (amount <= 0) {
+                    return 'Amount must be greater than zero';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _weeklyGoal = double.tryParse(value) ?? 0.0;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              DropdownButton<String>(
+                value: _selectedCurrency,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedCurrency = newValue;
+                  });
+                },
+                items: <String>[
+                  'USD',
+                  'EUR',
+                  'GBP',
+                  'JPY'
+                ] // Add more currencies if needed
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -157,7 +186,7 @@ class _BudgetPageState extends State<BudgetPage> {
             TextButton(
               onPressed: () {
                 _saveGoals();
-                _selectedBudgetType = 'Weekly'; // Set the selected budget type.
+                _selectedBudgetType = 'Weekly';
                 Navigator.pop(context);
               },
               child: Text('Save'),
@@ -174,24 +203,50 @@ class _BudgetPageState extends State<BudgetPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Set Monthly Goal'),
-          content: TextFormField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'Amount (\$)'),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a valid amount';
-              }
-              final double amount = double.tryParse(value) ?? 0.0;
-              if (amount <= 0) {
-                return 'Amount must be greater than zero';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              setState(() {
-                _monthlyGoal = double.tryParse(value) ?? 0.0;
-              });
-            },
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Amount (\$)'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a valid amount';
+                  }
+                  final double amount = double.tryParse(value) ?? 0.0;
+                  if (amount <= 0) {
+                    return 'Amount must be greater than zero';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _monthlyGoal = double.tryParse(value) ?? 0.0;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              DropdownButton<String>(
+                value: _selectedCurrency,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedCurrency = newValue;
+                  });
+                },
+                items: <String>[
+                  'USD',
+                  'EUR',
+                  'GBP',
+                  'JPY'
+                ] // Add more currencies if needed
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -203,8 +258,7 @@ class _BudgetPageState extends State<BudgetPage> {
             TextButton(
               onPressed: () {
                 _saveGoals();
-                _selectedBudgetType =
-                    'Monthly'; // Set the selected budget type.
+                _selectedBudgetType = 'Monthly';
                 Navigator.pop(context);
               },
               child: Text('Save'),
@@ -215,16 +269,16 @@ class _BudgetPageState extends State<BudgetPage> {
     );
   }
 
-  String _getBudgetStatus(double goal, double totalExpenses) {
+  String _getBudgetStatus(double goal, double totalExpenses, String currency) {
     double remainingBudget = goal - totalExpenses;
     double percentageUsed = (totalExpenses / goal) * 100;
 
     if (totalExpenses > goal) {
-      return 'You have exceeded your budget by \$${totalExpenses - goal}!';
+      return 'You have exceeded your budget by $currency${(totalExpenses - goal).toStringAsFixed(2)}!';
     } else if (percentageUsed >= 80) {
-      return 'You are almost completing your budget (Remaining: \$${remainingBudget.toStringAsFixed(2)})';
+      return 'You are almost completing your budget (Remaining: $currency${remainingBudget.toStringAsFixed(2)})';
     } else {
-      return 'You are within your budget (Remaining: \$${remainingBudget.toStringAsFixed(2)})';
+      return 'You are within your budget (Remaining: $currency${remainingBudget.toStringAsFixed(2)})';
     }
   }
 
@@ -244,6 +298,7 @@ class _BudgetPageState extends State<BudgetPage> {
               goalAmount: _weeklyGoal,
               totalAmount: _weeklyTotal,
               onTap: _onSetWeeklyGoal,
+              currency: _selectedCurrency!,
             ),
             SizedBox(height: 20),
             _buildGoalContainer(
@@ -251,16 +306,18 @@ class _BudgetPageState extends State<BudgetPage> {
               goalAmount: _monthlyGoal,
               totalAmount: _monthlyTotal,
               onTap: _onSetMonthlyGoal,
+              currency: _selectedCurrency!,
             ),
             SizedBox(height: 20),
             if (_selectedBudgetType != null && _selectedBudgetType == 'Weekly')
               Text(
-                _getBudgetStatus(_weeklyGoal, _weeklyTotal),
+                _getBudgetStatus(_weeklyGoal, _weeklyTotal, _selectedCurrency!),
                 style: TextStyle(fontSize: 16, color: Colors.red),
               ),
             if (_selectedBudgetType != null && _selectedBudgetType == 'Monthly')
               Text(
-                _getBudgetStatus(_monthlyGoal, _monthlyTotal),
+                _getBudgetStatus(
+                    _monthlyGoal, _monthlyTotal, _selectedCurrency!),
                 style: TextStyle(fontSize: 16, color: Colors.red),
               ),
           ],
