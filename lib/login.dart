@@ -9,8 +9,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String _email, _password;
   Map userData = {};
-  final _formkey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +21,31 @@ class _LoginState extends State<Login> {
         title: Text('Create Account'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      //body: SingleChildScrollView(
+      body: Form(
+        key: _formkey,
         child: Column(
           children: <Widget>[
+            TextFormField(
+              validator: (input) {
+                if (input.isEmpty) {
+                  return 'please type an email';
+                }
+              },
+              onSaved: (input) => _email = input, 
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextFormField(
+              validator: (input) {
+                if (input.length > 6) {
+                  return 'your password needs to have atleast 6 characters ';
+                }
+              },
+              onSaved: (input) = _password = input,
+              decoration: InputDecoration(labelText: 'password'),
+              obscureText: true,
+            ),
+            RaisedButton(onPressed: () {}, child: Text('sign in')),
             Padding(
               padding: const EdgeInsets.only(top: 30.0),
               child: Center(
@@ -99,4 +122,9 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+}
+
+void signIn() {
+  final FormState = _formKey.CurrentState;
+  if (FormState.validate()) {}
 }
