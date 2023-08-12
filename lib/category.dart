@@ -116,7 +116,7 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Expense Tracking'),
+        title: Text('Categories'),
         backgroundColor: Colors.purple,
       ),
       body: Padding(

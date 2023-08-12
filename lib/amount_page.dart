@@ -17,6 +17,7 @@ class _AmountPageState extends State<AmountPage> {
   double _amount = 0;
 
   List<String> currencyOptions = [
+    'UGX',
     'USD',
     'EUR',
     'GBP',
@@ -26,7 +27,7 @@ class _AmountPageState extends State<AmountPage> {
     'CHF',
     'CNY'
   ];
-  String selectedCurrency = 'USD'; // Default currency
+  String selectedCurrency = 'UGX'; // Default currency
 
   void _saveAmount() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

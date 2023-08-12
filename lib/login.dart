@@ -24,19 +24,6 @@ class _LoginState extends State<Login> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 30.0),
-              child: Center(
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: Colors.blueGrey)),
-                  /*	child: Image.asset('assets/logo.png'),*/
-                ),
-              ),
-            ),
-            Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: Padding(
                   padding: const EdgeInsets.all(12.0),

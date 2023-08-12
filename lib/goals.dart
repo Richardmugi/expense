@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +14,8 @@ class _BudgetPageState extends State<BudgetPage> {
   double _weeklyTotal = 0;
   double _monthlyTotal = 0;
   String? _selectedBudgetType;
-  String? _selectedCurrency = 'USD';
+  String? _selectedCurrency = 'UGX';
+  DateTime _selectedDate = DateTime.now(); // Default to today's date
 
   // New variable to store the selected budget type.
 
@@ -23,6 +25,7 @@ class _BudgetPageState extends State<BudgetPage> {
     prefs.setDouble('monthly_goal', _monthlyGoal);
     prefs.setString('selected_budget_type', _selectedBudgetType!);
     prefs.setString('selected_currency', _selectedCurrency!);
+    prefs.setString('selected_date', _selectedDate.toString());
   }
 
   void _loadGoals() async {
@@ -31,7 +34,9 @@ class _BudgetPageState extends State<BudgetPage> {
       _weeklyGoal = prefs.getDouble('weekly_goal') ?? 0;
       _monthlyGoal = prefs.getDouble('monthly_goal') ?? 0;
       _selectedBudgetType = prefs.getString('selected_budget_type');
-      _selectedCurrency = prefs.getString('selected_currency') ?? 'USD';
+      _selectedCurrency = prefs.getString('selected_currency') ?? 'UGX';
+      _selectedDate = DateTime.parse(
+          prefs.getString('selected_date') ?? DateTime.now().toString());
     });
   }
 
@@ -113,6 +118,11 @@ class _BudgetPageState extends State<BudgetPage> {
                 'Amount used: $currency ${totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(fontSize: 16),
               ),
+              SizedBox(height: 20),
+              Text(
+                'Selected Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+                style: TextStyle(fontSize: 16),
+              ),
             ],
             SizedBox(height: 20),
             ElevatedButton(
@@ -136,7 +146,7 @@ class _BudgetPageState extends State<BudgetPage> {
             children: [
               TextFormField(
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Amount (\$)'),
+                decoration: InputDecoration(labelText: 'Amount'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a valid amount';
@@ -162,6 +172,7 @@ class _BudgetPageState extends State<BudgetPage> {
                   });
                 },
                 items: <String>[
+                  'UGX',
                   'USD',
                   'EUR',
                   'GBP',
@@ -191,6 +202,28 @@ class _BudgetPageState extends State<BudgetPage> {
               },
               child: Text('Save'),
             ),
+            SizedBox(height: 20),
+            Text(
+              'Selected Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+              style: TextStyle(fontSize: 16),
+            ),
+            TextButton(
+              onPressed: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(DateTime.now().year - 1),
+                  lastDate: DateTime(DateTime.now().year + 1),
+                );
+
+                if (pickedDate != null) {
+                  setState(() {
+                    _selectedDate = pickedDate;
+                  });
+                }
+              },
+              child: Text('Pick Date'),
+            ),
           ],
         );
       },
@@ -208,7 +241,7 @@ class _BudgetPageState extends State<BudgetPage> {
             children: [
               TextFormField(
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Amount (\$)'),
+                decoration: InputDecoration(labelText: 'Amount'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a valid amount';
@@ -234,6 +267,7 @@ class _BudgetPageState extends State<BudgetPage> {
                   });
                 },
                 items: <String>[
+                  'UGX',
                   'USD',
                   'EUR',
                   'GBP',
@@ -263,6 +297,28 @@ class _BudgetPageState extends State<BudgetPage> {
               },
               child: Text('Save'),
             ),
+            SizedBox(height: 20),
+            Text(
+              'Selected Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+              style: TextStyle(fontSize: 16),
+            ),
+            TextButton(
+              onPressed: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(DateTime.now().year - 1),
+                  lastDate: DateTime(DateTime.now().year + 1),
+                );
+
+                if (pickedDate != null) {
+                  setState(() {
+                    _selectedDate = pickedDate;
+                  });
+                }
+              },
+              child: Text('Pick Date'),
+            ),
           ],
         );
       },
@@ -287,6 +343,7 @@ class _BudgetPageState extends State<BudgetPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Set Budget Goals'),
+        backgroundColor: Colors.purple,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
