@@ -1,6 +1,5 @@
 import 'package:expense/category.dart';
 
-import 'package:expense/goals.dart';
 import 'package:expense/login.dart';
 import 'package:expense/records.dart';
 
@@ -24,7 +23,6 @@ class MyApp extends StatelessWidget {
         '/second': (context) => const Login(),
         '/third': (context) => ExpenseTrackingPage(),
         '/fourth': (context) => RecordsPage(),
-        'fifth': (context) => BudgetPage(),
       },
     );
   }

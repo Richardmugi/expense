@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AmountPage extends StatefulWidget {
   final String expense;
+  final String category;
 
-  AmountPage(this.expense);
+  AmountPage(this.category, this.expense);
 
   @override
   _AmountPageState createState() => _AmountPageState();
@@ -32,10 +33,11 @@ class _AmountPageState extends State<AmountPage> {
   void _saveAmount() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final expenseRecord = {
+      'category': widget.category, // Include the category in the record
       'expense': widget.expense,
       'quantity': _quantity,
       'amount': _amount,
-      'currency': selectedCurrency, // Add selected currency to the record
+      'currency': selectedCurrency,
       'date': DateTime.now().toString(),
     };
     List<String> existingRecords = prefs.getStringList('expense_records') ?? [];
@@ -62,6 +64,10 @@ class _AmountPageState extends State<AmountPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              'Category: ${widget.category}', // Display the selected category
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             Text(
               'Expense: ${widget.expense}',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

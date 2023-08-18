@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:expense/amount_page.dart';
 
-import 'package:expense/goals.dart';
+import 'package:expense/setgoal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
@@ -98,18 +100,129 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
     setState(() {
       selectedExpense = expense;
     });
-    _navigateToAmountPage();
+    _navigateToAmountPage(
+        selectedCategory!, expense); // Pass the selected category and expense
   }
 
-  void _navigateToAmountPage() {
+  void _navigateToAmountPage(String category, String expense) {
     if (selectedExpense != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AmountPage(selectedExpense!),
+          builder: (context) =>
+              AmountPage(category, expense), // Pass both category and expense
         ),
       );
     }
+  }
+
+  void _setGoalForExpense(String expense) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Set Goal for $expense'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () => _showAmountDialog(expense, 'Weekly'),
+                child: Text('Set Weekly Goal'),
+              ),
+              ElevatedButton(
+                onPressed: () => _showAmountDialog(expense, 'Monthly'),
+                child: Text('Set Monthly Goal'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAmountDialog(String expense, String timeFrame) {
+    double _goalAmount = 0;
+    DateTime _selectedDate = DateTime.now(); // Initialize with the current date
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Set $timeFrame Goal for $expense'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Goal Amount'),
+                onChanged: (value) {
+                  setState(() {
+                    _goalAmount = double.tryParse(value) ?? 0.0;
+                  });
+                },
+              ),
+              SizedBox(height: 10),
+              Text('Select a Date:'),
+              ElevatedButton(
+                onPressed: () async {
+                  DateTime? selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (selectedDate != null) {
+                    setState(() {
+                      _selectedDate = selectedDate;
+                    });
+                  }
+                },
+                child: Text('Select Date'),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _saveGoal(expense, timeFrame, _goalAmount, _selectedDate);
+                  Navigator.pop(context);
+                },
+                child: Text('Save Goal'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _saveGoal(String expense, String timeFrame, double goalAmount,
+      DateTime selectedDate) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final goal = {
+      'expense': expense,
+      'timeFrame': timeFrame,
+      'goalAmount': goalAmount,
+      'selectedDate': selectedDate.toString(),
+    };
+    List<String> existingGoals = prefs.getStringList('expense_goals') ?? [];
+    existingGoals.add(json.encode(goal));
+    prefs.setStringList('expense_goals', existingGoals);
+  }
+
+  void _deleteCategory(String category) {
+    setState(() {
+      categories.remove(category);
+      selectedCategory = null;
+      selectedExpense = null;
+    });
+    _saveCategories();
+  }
+
+  void _deleteExpense(String expense) {
+    setState(() {
+      categories[selectedCategory!]!.remove(expense);
+      selectedExpense = null;
+    });
+    _saveCategories();
   }
 
   @override
@@ -190,12 +303,20 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
                             : Colors.grey,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            category,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteCategory(category),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -217,8 +338,22 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
                     return ListTile(
                       onTap: () => _onExpenseSelected(expense),
                       title: Text(expense),
-                      trailing:
-                          selectedExpense == expense ? Icon(Icons.check) : null,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (selectedExpense == expense) Icon(Icons.check),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteExpense(expense),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.attach_money,
+                                color: Colors.green), // Add goal icon
+                            onPressed: () => _setGoalForExpense(
+                                expense), // Call the function to set a goal
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -249,7 +384,7 @@ class _ExpenseTrackingPageState extends State<ExpenseTrackingPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => BudgetPage(),
+                builder: (context) => YourGoalsPage(),
               ),
             );
           } else if (index == 2) {

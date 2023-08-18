@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,8 +25,7 @@ class _RecordsPageState extends State<RecordsPage> {
     List<Map<String, dynamic>> records = recordStrings.map((record) {
       Map<String, dynamic> recordMap =
           Map<String, dynamic>.from(json.decode(record));
-      String currency = recordMap['currency'] ??
-          'USD'; // Default to USD if no currency is found
+      String currency = recordMap['currency'] ?? 'USD';
       recordMap['currency'] = currency;
       return recordMap;
     }).toList();
@@ -66,17 +66,23 @@ class _RecordsPageState extends State<RecordsPage> {
               children: [
                 ...List.generate(_expenseRecords.length, (index) {
                   final expenseRecord = _expenseRecords[index];
+                  final formattedDate = DateFormat.yMMMMd().format(
+                    DateTime.parse(expenseRecord['date']),
+                  );
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      title: Text('Expense: ${expenseRecord['expense']}'),
+                      title: Text(
+                          'Category: ${expenseRecord['category']}'), // Display the category
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text(
+                              'Expense: ${expenseRecord['expense']}'), // Display the expense
                           Text('Quantity: ${expenseRecord['quantity']}'),
                           Text(
                               'Amount: ${expenseRecord['currency']} ${expenseRecord['amount']}'),
-                          Text('Date: ${expenseRecord['date']}'),
+                          Text('Date: $formattedDate'),
                         ],
                       ),
                       trailing: IconButton(
